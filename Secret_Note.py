@@ -7,6 +7,14 @@ import shutil
 
 db_path = './DataBase/'
 password_file = db_path+"passwordInfo.txt"
+
+menu ='''
+    1. Register to Secret Note
+    2. Login to Secret Note
+    3. Retrieve Password
+    4. Exit
+    What do you want to do: '''
+
 menu1 = '''
 What do you want to do :
     1. Keep a secret
@@ -30,6 +38,9 @@ def check_in_file(filename, username, password='', mode=''):
             if mode == 'password' and line == [username,password]:
                 return True
             if mode == 'user' and line[0] == username:
+                return True
+            if mode == 'retrieve' and line[0] == username:
+                print('Your password : ',line[1])
                 return True
         else:
             return False
@@ -79,18 +90,15 @@ def create_user(user, user_list=[]):
 
 def select_user_or_create():
     verified_user = False
-    login_check = input('''
-        1. Register to Secret Note
-        2. Login to Secret Note
-        What do you want to do: ''')
+    user = ''
+    login_check = input(menu)
     if login_check == '1':
-        print("====Register===")
+        print("\n====Register===")
         try:
             user_list = [d for d in listdir(db_path) if path.isdir(path.join(db_path, d))]
         except Exception:
             mkdir(db_path)
             user_list = [d for d in listdir(db_path) if path.isdir(path.join(db_path, d))]
-
         user = input("Enter username: ").strip().upper()
         user, flag = create_user(user, user_list)
         print(user)
@@ -102,9 +110,8 @@ def select_user_or_create():
                 print(f'''
         ==Welcome {user} to Secret Note==\n
         ''')
-
-    if login_check == '2':
-        print("====Login===")
+    elif login_check == '2':
+        print("\n====Login===")
         user = input("Enter username: ").strip().upper()
         if path.exists(password_file):
             if check_in_file(password_file, user, mode = 'user'):
@@ -112,13 +119,30 @@ def select_user_or_create():
                 if not verified_user:
                     print('Invalid password')
                 else:
-                        print(f'''
+                    print(f'''
         ==Welcome Back {user}==\n
         ''')
             else:
                 print('Invalid username')
         else:
             print('Invalid username')
+    elif login_check == '3':
+        print("\n====Retrieve password===")
+        user = input("Enter username: ").strip().upper()
+        if path.exists(password_file) and user != "":
+            if not check_in_file(password_file, user, mode='retrieve'):
+                print('username not found\n')
+        else:
+            print("Username not found\n")
+        retrieve_flag = input('Do you want to exit?\n press n/no to continue \n Any other key to exit(No):').strip().lower()
+        if retrieve_flag in n_flags:
+            verified_user, user = select_user_or_create()
+    elif login_check == '4':
+        print('Comeback again')
+    else:
+        print('Invalid input')
+        verified_user, user = select_user_or_create()
+
     return (verified_user,user)
 
 def keep_secrets(user):
@@ -236,6 +260,7 @@ def run():
                 logout_flag = input("Do you really want to log out (no):").strip().lower()
                 if logout_flag in y_flags:
                     print('**See you next time**')
+                    run()
                     break
                 elif logout_flag not in n_flags:
                     print('Invalid parameter')
