@@ -64,10 +64,10 @@ def fileWrite(data, filename, mode):
         fd.write(data+'\n')
 
 def new_password(username):
-    Password = input('Create New Password : ').strip()
+    Password = input('Create New Password : ')
     try_count = 3
     while Password == "" and try_count > 0:
-        Password = input("Password should contain something. Try again : ").strip()
+        Password = input("Password should contain something. Try again : ")
         try_count -= 1
     if try_count == 0 and Password == "":
         return False
