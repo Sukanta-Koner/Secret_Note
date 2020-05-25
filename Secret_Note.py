@@ -14,7 +14,7 @@ menu ='''
     3. Retrieve Password
     4. Exit
     What do you want to do: '''
-
+    
 menu1 = '''
 What do you want to do :
     1. Keep a secret
@@ -81,11 +81,11 @@ def create_user(user, user_list=[]):
     if user_list:
         if (not user) or (user in user_list):
             user = input("username already used. Try another username: ").strip().upper()
-            create_user(user, user_list)
+            user, _ = create_user(user, user_list)
     else:
         if not user :
             user = input("invalid. Try another username: ").strip().upper()
-            create_user(user, user_list)
+            user, _ = create_user(user, user_list)
     return (user,True)
 
 def select_user_or_create():
@@ -101,11 +101,11 @@ def select_user_or_create():
             user_list = [d for d in listdir(db_path) if path.isdir(path.join(db_path, d))]
         user = input("Enter username: ").strip().upper()
         user, flag = create_user(user, user_list)
-        print(user)
         if flag:
             verified_user = new_password(user)
             if not verified_user:
                     print('Invalid password')
+                    verified_user, user = select_user_or_create()
             else:
                 print(f'''
         ==Welcome {user} to Secret Note==\n
@@ -113,19 +113,22 @@ def select_user_or_create():
     elif login_check == '2':
         print("\n====Login===")
         user = input("Enter username: ").strip().upper()
-        if path.exists(password_file):
+        if path.exists(password_file) and user != "":
             if check_in_file(password_file, user, mode = 'user'):
                 verified_user = password_check(user)
                 if not verified_user:
                     print('Invalid password')
+                    verified_user, user = select_user_or_create()
                 else:
                     print(f'''
         ==Welcome Back {user}==\n
         ''')
             else:
                 print('Invalid username')
+                verified_user, user = select_user_or_create()
         else:
             print('Invalid username')
+            verified_user, user = select_user_or_create()
     elif login_check == '3':
         print("\n====Retrieve password===")
         user = input("Enter username: ").strip().upper()
