@@ -4,6 +4,7 @@ from os import listdir
 from os import mkdir
 from os import remove
 import shutil
+import datetime
 
 db_path = './SNDataBase/'
 password_file = db_path+"SNPasswordInfo.txt"
@@ -30,6 +31,29 @@ secret exists with same title.
     2. Do you want to re-write the secret.
     Press other key to Cancel.
 '''
+
+def getdatetime():
+    """getdate - This function will return current system date and time
+
+    Returns:
+        currenttime {str} -- return current time in []
+    """
+    currenttime = '['+str(datetime.datetime.now()).split('.')[0]+'] : '
+    return currenttime
+
+def changetimestamp(filepath):
+    """changetimestamp - This function will change the 1st time stamp of the note
+
+    Arguments:
+        filepath {str} -- filename
+    """
+    with open(filepath, 'r+') as fd:
+        content = fd.read()
+        note = content.split(':',1)[1]
+        currenttime = getdatetime()
+        new_note = currenttime+note
+        fd.write(new_note)
+    pass
 
 def check_in_file(username, password='', mode=''):
     """check-in-file - This function read and username and password from SNPasswordInfo file.
@@ -239,28 +263,34 @@ def keep_secrets(user):
             print("Title should content some characters. Try again")
             filename = input('Title : ').strip()
         if filename != "":
-            filepath = './DataBase/'+user+'/'+filename+'.txt'
+            filepath = db_path+user+'/'+filename+'.txt'
+            currenttime = getdatetime()
             if path.exists(filepath):
                 note_choice = input(menu2+'Enter your choice : ')
                 if(note_choice == '1'):
-                    note = input('Note : ')
-                    fileWrite(note, filepath, 'a')
+                    note = input('Note : ').strip()
+                    if note != "":
+                        fileWrite(currenttime+note, filepath, 'a')
+                        # changetimestamp(filepath)
                     print('Your secret is saved successfully\n')
-
                 elif note_choice == '2':
                     note = input('Note : ')
-                    fileWrite(note, filepath, 'w')
+                    if note != "":
+                        fileWrite(currenttime+note, filepath, 'w')
                     print('Your secret is saved successfully\n')
                 else:
                     print("Canceled successfully.")
             else:
-                note = input('Note : ')
-                fileWrite(note, filepath, 'w')
+                note = input('Note : ').strip()
+                if note != "":
+                    fileWrite(currenttime+note, filepath, 'w+')
+                else:
+                    fileWrite(note, filepath, 'w+')
                 print('Your secret is saved successfully\n')
         else:
             print("Invalid Title")
             break
-        cont_flag = input('Do you want to keep another secret?(no)').lower()
+        cont_flag = input('Do you want to keep another secret?(no)').strip().lower()
         if cont_flag in n_flags:
             break
         elif cont_flag not in y_flags:
@@ -308,7 +338,7 @@ def delete_secret(user):
         print('=================================================')
         secret_to_delete = input('Which Secret do you want to delete : ')
         if path.exists(db_path + user + '/' + secret_to_delete + '.txt'):
-            delete_confermation = input("Do you really want to delete (No) : ").lower()
+            delete_confermation = input("Do you really want to delete (No) : ").strip().lower()
             if delete_confermation in y_flags:
                 remove(db_path + user + '/' + secret_to_delete + '.txt')
             elif delete_confermation not in n_flags:
@@ -328,7 +358,7 @@ def delete_profile(user):
         {bool} --   True  - If profile got deleted successfully
                     False - If profile is not deleted.
     """
-    profile_flag = input('Do you really want to delete the profile(No):').lower()
+    profile_flag = input('Do you really want to delete the profile(No):').strip().lower()
     if profile_flag in y_flags:
         shutil.rmtree(db_path + user)
         with open(password_file ,"r+") as f:
